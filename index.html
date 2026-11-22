@@ -90,6 +90,24 @@ h1 { display: inline-flex; align-items: center; gap: 16px; margin: 0; font-size:
 .opt { padding: 0; border: 0; background: none; font-size: 11px; text-align: center; }
 .opt svg { display: block; width: 100%; aspect-ratio: 1 / 2; margin-bottom: 4px; box-shadow: 0 3px 8px rgba(0,0,0,.25); outline-offset: 3px; }
 .opt.on svg { outline: 2px solid var(--verm); }
+#ownOpts h4 { margin: 0 0 8px; font-size: 13px; letter-spacing: .08em; opacity: .7; }
+.opt-wrap { position: relative; }
+.opt img { display: block; width: 100%; aspect-ratio: 1 / 2; object-fit: cover; background: #ddd5c3; box-shadow: 0 3px 8px rgba(0,0,0,.25); outline-offset: 3px; }
+.opt.on img { outline: 2px solid var(--verm); }
+.del { position: absolute; top: -7px; right: -7px; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 50%; background: var(--ink); color: #fff !important; font-size: 15px; line-height: 22px; box-shadow: 0 2px 4px rgba(0,0,0,.3); }
+.del:hover, .del:focus-visible { background: var(--verm); }
+.cropper { position: fixed; inset: 0; z-index: 2500000; display: grid; place-items: center; padding: 16px; background: rgba(20,22,24,.7); }
+.cbox { width: min(340px, 100%); max-height: 100%; overflow: auto; padding: 20px 26px; text-align: center; background: var(--grain) var(--paper); box-shadow: 0 24px 60px rgba(0,0,0,.4); }
+.cbox h3 { margin: 0; font-size: 22px; }
+.cbox p { margin: 2px 0 14px; font-size: 13px; opacity: .6; }
+.cbox .rod { width: calc(min(200px, 24vh) + 20px); margin: 0 auto; }
+.cframe { position: relative; width: min(200px, 24vh); aspect-ratio: 1 / 2; margin: 0 auto; overflow: hidden; background: #efe6cf; cursor: grab; touch-action: none; box-shadow: 0 8px 20px rgba(0,0,0,.2); }
+.cframe:active { cursor: grabbing; }
+.cframe canvas { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: none; }
+#czoom { width: 100%; margin: 16px 0 4px; accent-color: var(--ink); }
+.crow { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
+.crow button:not(.primary) { flex: 1; padding: 7px 8px; font-size: 13px; background: none; border: 1px solid rgba(38,40,43,.35); border-radius: 3px; }
+.crow .primary { flex: 1; }
 .own { width: 100%; padding: 7px; font-size: 14px; background: none; border: 1px dashed rgba(38,40,43,.45); border-radius: 4px; }
 
 /* ---------- the wall ---------- */
@@ -255,7 +273,8 @@ h1 { display: inline-flex; align-items: center; gap: 16px; margin: 0; font-size:
       <button class="change" id="changeArt">change painting</button>
       <div class="picker" id="picker" hidden>
         <div class="opts" id="opts"></div>
-        <button class="own" id="ownArt">Use our own picture…</button>
+        <div id="ownOpts" hidden></div>
+        <button class="own" id="ownArt">Hang our own picture…</button>
       </div>
     </aside>
     <div class="wall" id="wall"></div>
@@ -265,6 +284,19 @@ h1 { display: inline-flex; align-items: center; gap: 16px; margin: 0; font-size:
 <div class="lightbox" id="lightbox"><figure><img alt=""><figcaption></figcaption></figure></div>
 <input type="file" id="file" accept="image/*" multiple hidden>
 <input type="file" id="artFile" accept="image/*" hidden>
+
+<div class="cropper" id="cropper" hidden>
+  <div class="cbox" role="dialog" aria-label="Frame your picture">
+    <h3>Frame your picture</h3>
+    <p>Drag to move · scroll or pinch to zoom</p>
+    <div class="rod"></div>
+    <div class="cframe" id="cframe"><canvas id="cimg"></canvas></div>
+    <div class="rod"></div>
+    <input type="range" id="czoom" min="0" max="1" step="0.001" aria-label="Zoom">
+    <div class="crow"><button id="cfit">Fit whole picture</button><button id="cfill">Fill the scroll</button></div>
+    <div class="crow"><button id="ccancel">Cancel</button><button class="primary" id="cok">Hang it</button></div>
+  </div>
+</div>
 
 <script>
 // Everything (text, positions, photos, painting choice, GitHub token) is AES-GCM encrypted in the
@@ -286,7 +318,7 @@ const PLACEHOLDER = { photo: 'add a caption…', note: 'write something…', quo
 
 const $ = id => document.getElementById(id);
 const enc = new TextEncoder(), dec = new TextDecoder();
-let key, salt, token, vaultBytes, vaultSha, items = [], scroll = 'pine', maxZ = 1, dirty = false, timer = null, addZone;
+let key, salt, token, vaultBytes, vaultSha, items = [], scroll = 'pine', own = [], maxZ = 1, dirty = false, timer = null, addZone;
 let queue = Promise.resolve();
 const urls = {};
 
@@ -337,11 +369,12 @@ const serial = fn => (queue = queue.catch(() => {}).then(fn)); // one commit at 
 
 // ---------- vault ----------
 async function saveVault() {
-  vaultSha = await ghPut('vault.enc', cat(salt, await seal(enc.encode(JSON.stringify({ token, items, scroll })))), vaultSha);
+  vaultSha = await ghPut('vault.enc', cat(salt, await seal(enc.encode(JSON.stringify({ token, items, scroll, own })))), vaultSha);
 }
 async function openVault() {
   const d = JSON.parse(dec.decode(await unseal(vaultBytes.subarray(16))));
-  token = d.token; items = d.items || []; scroll = d.scroll || 'pine';
+  token = d.token; items = d.items || []; scroll = d.scroll || 'pine'; own = d.own || [];
+  if (typeof scroll === 'object') scroll = own.find(o => o.img === scroll.img) || (own.push(scroll), scroll);
 }
 function saveSoon() {
   dirty = true; status('unsaved…'); clearTimeout(timer);
@@ -568,6 +601,9 @@ async function shrink(file) {
 async function uploadImage(file, onShown) {
   let jpg;
   try { jpg = await shrink(file); } catch { alert(`Couldn't read ${file.name}.`); return null; }
+  return uploadBlob(jpg, onShown);
+}
+async function uploadBlob(jpg, onShown) {
   const img = uid(); urls[img] = URL.createObjectURL(jpg); onShown?.(img);
   status('uploading picture…');
   try { return { img, imgSha: await serial(async () => ghPut('img/' + img + '.enc', await seal(new Uint8Array(await jpg.arrayBuffer())))) }; }
@@ -843,32 +879,107 @@ const PAINTINGS = {
 const art = {};
 const svgOf = id => `<svg viewBox="0 0 300 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${PAINTINGS[id].name} painting">${art[id] ??= PAINTINGS[id].draw()}</svg>`;
 
+// scroll is a painting id (string) or one of our own pictures ({ img, imgSha }, kept in `own`)
+const isOn = v => typeof v === 'string' ? scroll === v : scroll?.img === v.img;
 function showScroll() {
   const art = $('art');
   if (typeof scroll === 'string') art.innerHTML = svgOf(PAINTINGS[scroll] ? scroll : 'pine');
   else { art.innerHTML = '<img alt="our painting">'; loadImg(scroll).then(u => { art.firstChild.src = u; }, () => {}); }
-  document.querySelectorAll('.opt').forEach(o => o.classList.toggle('on', o.dataset.id === scroll));
+  document.querySelectorAll('#opts .opt').forEach(o => o.classList.toggle('on', isOn(o.dataset.id)));
 }
 function setScroll(v) {
-  const k = $('kake'), old = scroll;
+  const k = $('kake');
   $('picker').hidden = true;
-  if (old !== v && typeof old === 'object') dropImg(old);
   scroll = v; saveSoon();
   k.classList.add('rolling');
   setTimeout(() => { showScroll(); k.classList.remove('rolling'); }, 650);
 }
+function renderOwn() {
+  const box = $('ownOpts');
+  box.hidden = !own.length;
+  box.innerHTML = '<h4>Our pictures</h4><div class="opts"></div>';
+  own.forEach((o, i) => {
+    const w = document.createElement('div');
+    w.className = 'opt-wrap';
+    w.innerHTML = `<button class="opt${isOn(o) ? ' on' : ''}"><img alt="our picture ${i + 1}"></button><button class="del" title="Delete this picture" aria-label="Delete this picture">×</button>`;
+    loadImg(o).then(u => { w.querySelector('img').src = u; }, () => {});
+    w.querySelector('.opt').onclick = () => setScroll(o);
+    w.querySelector('.del').onclick = () => {
+      if (!confirm('Delete this picture for good?')) return;
+      own = own.filter(x => x !== o); dropImg(o);
+      if (isOn(o)) setScroll('pine'); else saveSoon();
+      renderOwn();
+    };
+    box.lastChild.append(w);
+  });
+}
 function buildPicker() {
   $('opts').innerHTML = Object.keys(PAINTINGS).map(id => `<button class="opt" data-id="${id}">${svgOf(id)}${PAINTINGS[id].name}</button>`).join('');
   $('opts').onclick = e => { const id = e.target.closest('.opt')?.dataset.id; if (id) setScroll(id); };
-  $('changeArt').onclick = () => { $('picker').hidden = !$('picker').hidden; };
+  $('changeArt').onclick = () => { renderOwn(); $('picker').hidden = !$('picker').hidden; };
   $('ownArt').onclick = () => $('artFile').click();
-  $('artFile').onchange = async e => {
+  $('artFile').onchange = e => {
     const f = e.target.files[0]; e.target.value = '';
-    if (!f) return;
-    const up = await uploadImage(f);
-    if (up) setScroll(up);
+    if (f) openCropper(f);
   };
 }
+
+// ---------- framing our own picture for the scroll: drag to move, slider / wheel / pinch to zoom ----------
+const crop = { bmp: null, s: 1, x: 0, y: 0, fit: 1, fill: 1, max: 1 };
+const fw = () => $('cframe').clientWidth, fh = () => $('cframe').clientHeight;
+function cropApply() {
+  const c = crop, W = c.bmp.width * c.s, H = c.bmp.height * c.s;
+  c.x = Math.min(Math.max(c.x, Math.min(0, fw() - W)), Math.max(0, fw() - W));
+  c.y = Math.min(Math.max(c.y, Math.min(0, fh() - H)), Math.max(0, fh() - H));
+  $('cimg').style.transform = `translate(${c.x}px, ${c.y}px) scale(${c.s})`;
+  $('czoom').value = Math.log(c.s / c.fit) / Math.log(c.max / c.fit);
+}
+function cropScale(s, cx = fw() / 2, cy = fh() / 2) { // zoom around a point in the frame
+  const c = crop, n = Math.min(Math.max(s, c.fit), c.max);
+  c.x = cx - (cx - c.x) * n / c.s; c.y = cy - (cy - c.y) * n / c.s; c.s = n; cropApply();
+}
+function cropPreset(s) { const c = crop; c.s = s; c.x = (fw() - c.bmp.width * s) / 2; c.y = (fh() - c.bmp.height * s) / 2; cropApply(); }
+async function openCropper(file) {
+  try { crop.bmp = await createImageBitmap(file); } catch { return alert(`Couldn't read ${file.name}.`); }
+  $('picker').hidden = true; $('cropper').hidden = false;
+  const cv = $('cimg'); cv.width = crop.bmp.width; cv.height = crop.bmp.height;
+  cv.getContext('2d').drawImage(crop.bmp, 0, 0);
+  crop.fit = Math.min(fw() / crop.bmp.width, fh() / crop.bmp.height);
+  crop.fill = Math.max(fw() / crop.bmp.width, fh() / crop.bmp.height);
+  crop.max = crop.fill * 4; crop.s = crop.fill;
+  cropPreset(crop.fill);
+}
+function cropperEvents() {
+  const f = $('cframe'), pts = new Map();
+  let last = null;
+  f.onpointerdown = e => { f.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); last = null; };
+  f.onpointermove = e => {
+    if (!pts.has(e.pointerId)) return;
+    const prev = pts.get(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pts.size === 1) { crop.x += e.clientX - prev[0]; crop.y += e.clientY - prev[1]; cropApply(); return; }
+    const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]), r = f.getBoundingClientRect();
+    if (last) cropScale(crop.s * d / last, (a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top);
+    last = d;
+  };
+  f.onpointerup = f.onpointercancel = e => { pts.delete(e.pointerId); last = null; };
+  f.onwheel = e => { e.preventDefault(); const r = f.getBoundingClientRect(); cropScale(crop.s * Math.exp(-e.deltaY * .0015), e.clientX - r.left, e.clientY - r.top); };
+  $('czoom').oninput = e => cropScale(crop.fit * (crop.max / crop.fit) ** +e.target.value);
+  $('cfit').onclick = () => cropPreset(crop.fit);
+  $('cfill').onclick = () => cropPreset(crop.fill);
+  $('ccancel').onclick = () => { $('cropper').hidden = true; crop.bmp = null; };
+  $('cok').onclick = async () => {
+    const c = crop, out = document.createElement('canvas'), k = 800 / fw();
+    out.width = 800; out.height = 1600;
+    const g = out.getContext('2d');
+    g.fillStyle = '#efe6cf'; g.fillRect(0, 0, 800, 1600); // paper shows around a "fit" picture
+    g.drawImage(c.bmp, c.x * k, c.y * k, c.bmp.width * c.s * k, c.bmp.height * c.s * k);
+    $('cropper').hidden = true; c.bmp = null;
+    const jpg = await new Promise(ok => out.toBlob(ok, 'image/jpeg', .88));
+    const up = await uploadBlob(jpg);
+    if (up) { own.push(up); setScroll(up); }
+  };
+}
+cropperEvents();
 
 buildWall();
 buildPicker();

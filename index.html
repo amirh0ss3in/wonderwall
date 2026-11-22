@@ -349,12 +349,19 @@ async function unseal(buf) {
 // ---------- GitHub ----------
 const httpError = r => Object.assign(new Error('GitHub ' + r.status), { status: r.status });
 function headers(accept) { const h = { Accept: accept }; if (token) h.Authorization = 'Bearer ' + token; return h; }
-async function ghGet(path, raw) {
-  const r = await fetch(API + path + '?ref=' + BRANCH, { cache: 'no-store',
-    headers: headers(raw ? 'application/vnd.github.raw' : 'application/vnd.github+json') });
+// file metadata (sha) only; never read bytes from here: the contents API "helpfully" re-encodes
+// small binary files it mistakes for text (e.g. KOI8-R → UTF-8), which corrupts the ciphertext
+async function ghGet(path) {
+  const r = await fetch(API + path + '?ref=' + BRANCH, { cache: 'no-store', headers: headers('application/vnd.github+json') });
   if (r.status === 404) return null;
   if (!r.ok) throw httpError(r);
-  return raw ? new Uint8Array(await r.arrayBuffer()) : r.json();
+  return r.json();
+}
+// exact bytes of a stored file, by its git blob sha (blobs are immutable, so caching is fine)
+async function ghBlob(sha) {
+  const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/git/blobs/${sha}`, { headers: headers('application/vnd.github+json') });
+  if (!r.ok) throw httpError(r);
+  return unb64((await r.json()).content);
 }
 async function ghWrite(method, path, body) {
   const r = await fetch(API + path, { method,
@@ -404,7 +411,8 @@ async function boot() {
   try { meta = await ghGet('vault.enc'); }
   catch (e) { return showLock(false, `Couldn't reach GitHub (${e.message}). Try reloading.`); }
   if (!meta) return showLock(true);
-  vaultBytes = meta.content ? unb64(meta.content) : await ghGet('vault.enc', true);
+  try { vaultBytes = await ghBlob(meta.sha); }
+  catch (e) { return showLock(false, `Couldn't reach GitHub (${e.message}). Try reloading.`); }
   vaultSha = meta.sha; salt = vaultBytes.slice(0, 16);
   const saved = lsGet();
   if (saved) {
@@ -592,7 +600,8 @@ function drag(e, el, it) {
 
 // ---------- photos ----------
 async function loadImg(o) {
-  return urls[o.img] ??= URL.createObjectURL(new Blob([await unseal(await ghGet('img/' + o.img + '.enc', true))], { type: 'image/jpeg' }));
+  const sha = o.imgSha || (await ghGet('img/' + o.img + '.enc')).sha;
+  return urls[o.img] ??= URL.createObjectURL(new Blob([await unseal(await ghBlob(sha))], { type: 'image/jpeg' }));
 }
 async function shrink(file) {
   const bmp = await createImageBitmap(file), s = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));

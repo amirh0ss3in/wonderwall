@@ -7,69 +7,111 @@
 <title>Our Wonder Wall</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Permanent+Marker&family=Special+Elite&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kurenaido&display=swap" rel="stylesheet">
 <style>
-:root { --ink: #2b2118; --paper: #fdf8ee; --room: #1c1714; }
+:root {
+  --ink: #26282b; --paper: #f4efe3; --verm: #b5442f;
+  --kw: min(270px, 37vh); /* scroll width; the painting is 1:2 */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .2 0 0 0 0 .22 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
 * { box-sizing: border-box; }
 html, body { margin: 0; }
 body {
-  min-height: 100vh; color: #f3e9da; font-family: 'Caveat', cursive;
-  background: radial-gradient(ellipse at 50% 0%, #3d2e23 0%, var(--room) 65%) fixed var(--room);
+  min-height: 100vh; color: var(--ink); font-family: 'Shippori Mincho', serif;
+  background-color: #d4d6d9;
+  background-image: var(--grain),
+    radial-gradient(ellipse 60% 50% at 90% 10%, rgba(70,75,85,.3), transparent),
+    radial-gradient(ellipse 50% 60% at 10% 90%, rgba(255,255,255,.55), transparent),
+    radial-gradient(ellipse 40% 40% at 55% 55%, rgba(95,100,110,.14), transparent);
+  background-attachment: fixed;
 }
-button { font: inherit; cursor: pointer; }
+/* sunlight falling through a window */
+body::before {
+  content: ''; position: fixed; inset: -30%; z-index: 0; pointer-events: none; filter: blur(26px);
+  background: linear-gradient(125deg, transparent 30%, rgba(255,255,255,.45) 36%, transparent 42%, transparent 48%,
+    rgba(255,255,255,.3) 52%, transparent 57%, transparent 62%, rgba(255,255,255,.35) 66%, transparent 72%);
+}
+button { font: inherit; color: inherit; cursor: pointer; }
 [hidden] { display: none !important; }
+main { position: relative; z-index: 1; }
 
-/* ---------- header + string lights ---------- */
-header { position: relative; text-align: center; padding: 78px 16px 4px; }
-.lights { position: absolute; inset: 0 0 auto 0; height: 70px; pointer-events: none; }
-.lights svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.bulb {
-  position: absolute; width: 11px; height: 17px; margin-left: -5.5px; border-radius: 50% 50% 45% 45%;
-  background: var(--c); box-shadow: 0 0 14px 4px var(--c); animation: twinkle 3.2s ease-in-out infinite; animation-delay: var(--d);
+/* ---------- header ---------- */
+header { position: relative; padding: 46px 16px 18px; text-align: center; }
+h1 { display: inline-flex; align-items: center; gap: 16px; margin: 0; font-size: clamp(36px, 5.5vw, 62px); font-weight: 700; letter-spacing: .04em; }
+.stamp {
+  display: inline-grid; place-items: center; width: .82em; height: .82em; border-radius: 6px;
+  background: var(--verm); color: #f8efe6; font-size: .5em; box-shadow: inset 0 0 0 3px rgba(255,255,255,.18);
+  transform: rotate(4deg);
 }
-.bulb::before { content: ''; position: absolute; top: -5px; left: 2.5px; width: 6px; height: 6px; background: #2a2a2a; border-radius: 2px; }
-@keyframes twinkle { 50% { opacity: .55; box-shadow: 0 0 5px 1px var(--c); } }
-h1 { margin: 0; font-size: clamp(46px, 7vw, 80px); font-weight: 700; color: #fff4dc; text-shadow: 0 0 22px rgba(255, 200, 120, .45); }
-.sub { margin: 0 0 6px; font-size: 23px; opacity: .75; }
-.bar { position: absolute; top: 10px; right: 14px; z-index: 2; display: flex; gap: 12px; align-items: center; font-size: 20px; }
-.bar button { background: none; color: inherit; border: 1px solid rgba(255,255,255,.25); border-radius: 20px; padding: 1px 14px; }
+.sub { margin: 6px 0 0; font-size: 15px; letter-spacing: .22em; text-transform: lowercase; opacity: .6; }
+.bar { position: absolute; top: 14px; right: 16px; display: flex; gap: 12px; align-items: center; font-size: 14px; }
+.bar button { background: none; border: 1px solid rgba(38,40,43,.35); border-radius: 999px; padding: 3px 14px; }
+
+/* ---------- room: scroll on the left, wall on the right ---------- */
+.room {
+  display: grid; grid-template-columns: calc(var(--kw) + 56px) minmax(0, 1fr); gap: 28px;
+  max-width: 1720px; margin: 0 auto 56px; padding: 0 24px;
+}
+@media (max-width: 1000px) {
+  :root { --kw: 160px; }
+  .room { grid-template-columns: 1fr; padding: 0 10px; }
+  .kake { position: relative !important; top: 0 !important; }
+}
+
+/* ---------- the hanging scroll (kakejiku) ---------- */
+.kake { position: sticky; z-index: 1500000; top: 18px; align-self: start; justify-self: center; width: var(--kw); padding-top: 64px; }
+.nail { position: absolute; top: 0; left: 50%; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: #3a3a3a; box-shadow: 1px 2px 2px rgba(0,0,0,.35); }
+.sway { transform-origin: 50% -60px; animation: sway 8s ease-in-out infinite; }
+@keyframes sway { 0%, 100% { rotate: -.45deg; } 50% { rotate: .45deg; } }
+.hanger { position: absolute; top: -60px; left: 0; width: 100%; height: 62px; overflow: visible; }
+.rod {
+  position: relative; z-index: 2; height: 13px; margin: 0 -10px; border-radius: 3px;
+  background: linear-gradient(#d9b98c, #b88a57 55%, #9a6d40); box-shadow: 0 3px 5px rgba(0,0,0,.25);
+}
+.art {
+  position: relative; aspect-ratio: 1 / 2; overflow: hidden; background: #efe6cf;
+  box-shadow: 0 22px 34px rgba(0,0,0,.22); transform-origin: top;
+  transition: transform .6s cubic-bezier(.6,0,.4,1);
+}
+.art svg, .art img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.rod.bottom { transition: transform .6s cubic-bezier(.6,0,.4,1); }
+.rolling .art { transform: scaleY(0); }
+.rolling .rod.bottom { transform: translateY(calc(-2 * var(--kw))); }
+.change {
+  display: block; margin: 18px auto 0; padding: 4px 14px; font-size: 13px; letter-spacing: .1em;
+  background: rgba(244,239,227,.55); border: 1px solid rgba(38,40,43,.3); border-radius: 999px;
+}
+.picker {
+  position: absolute; top: 70px; left: calc(100% + 18px); z-index: 3000; width: 300px; padding: 14px;
+  background: var(--grain) var(--paper); box-shadow: 0 18px 40px rgba(0,0,0,.28); border-radius: 4px;
+}
+@media (max-width: 1000px) { .picker { top: 100%; left: 50%; transform: translateX(-50%); } }
+.opts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 12px; }
+.opt { padding: 0; border: 0; background: none; font-size: 11px; text-align: center; }
+.opt svg { display: block; width: 100%; aspect-ratio: 1 / 2; margin-bottom: 4px; box-shadow: 0 3px 8px rgba(0,0,0,.25); outline-offset: 3px; }
+.opt.on svg { outline: 2px solid var(--verm); }
+.own { width: 100%; padding: 7px; font-size: 14px; background: none; border: 1px dashed rgba(38,40,43,.45); border-radius: 4px; }
 
 /* ---------- the wall ---------- */
-.frame {
-  max-width: 1500px; margin: 14px auto 48px; padding: 18px; border-radius: 8px;
-  background: repeating-linear-gradient(97deg, #6b4526 0 7px, #7a5131 7px 10px, #5f3c20 10px 17px, #72492a 17px 22px);
-  box-shadow: 0 30px 60px rgba(0,0,0,.55), inset 0 0 0 2px rgba(0,0,0,.3);
-}
-.wall {
-  display: grid; grid-template-columns: repeat(3, 1fr); border-radius: 3px; user-select: none;
-  background-color: #c39560;
-  background-image:
-    radial-gradient(rgba(95,55,20,.35) 1px, transparent 1.6px),
-    radial-gradient(rgba(255,235,200,.22) 1px, transparent 1.6px),
-    radial-gradient(rgba(70,40,10,.22) 2px, transparent 2.6px);
-  background-size: 7px 7px, 11px 11px, 23px 23px;
-  background-position: 0 0, 3px 5px, 9px 13px;
-  box-shadow: inset 0 0 60px rgba(60,30,5,.6);
-}
-.zone { position: relative; min-height: 560px; padding: 16px; }
-.zone + .zone { border-left: 2px dashed rgba(70,40,15,.45); }
+.wall { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); user-select: none; }
+.zone { position: relative; min-height: 600px; padding: 10px 16px; }
+.zone + .zone { border-left: 1px solid rgba(38,40,43,.14); }
 @media (max-width: 900px) {
   .wall { grid-template-columns: 1fr; }
-  .zone + .zone { border-left: 0; border-top: 2px dashed rgba(70,40,15,.45); }
-  .frame { margin: 8px 8px 32px; padding: 10px; }
+  .zone + .zone { border-left: 0; border-top: 1px solid rgba(38,40,43,.14); }
 }
 .zhead { position: relative; z-index: 1000000; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
-.label {
-  position: relative; padding: 8px 20px 5px; background: var(--paper); color: var(--zc);
-  font-family: 'Permanent Marker', cursive; font-size: 26px; transform: rotate(-2deg); box-shadow: 0 3px 7px rgba(0,0,0,.3);
-}
-.label small { display: block; font-family: 'Caveat', cursive; font-size: 20px; color: var(--ink); opacity: .8; }
+.label { display: flex; gap: 12px; align-items: center; }
+.kanji { font-size: 46px; font-weight: 700; line-height: 1; color: var(--zc); }
+.label b { display: block; font-size: 21px; letter-spacing: .06em; }
+.label small { display: block; font-size: 13px; letter-spacing: .06em; opacity: .62; }
+.adds { display: flex; gap: 5px; }
 .adds button {
-  width: 42px; height: 42px; margin-left: 4px; border: 0; border-radius: 50%; background: var(--paper);
-  font-size: 19px; box-shadow: 0 2px 6px rgba(0,0,0,.35); transition: transform .15s;
+  padding: 3px 11px; font-size: 13px; white-space: nowrap; background: rgba(244,239,227,.6);
+  border: 1px solid rgba(38,40,43,.32); border-radius: 999px; transition: background .15s, color .15s;
 }
-.adds button:hover, .adds button:focus-visible { transform: scale(1.12) rotate(-6deg); }
-.hint { position: absolute; left: 0; right: 0; top: 210px; padding: 0 32px; text-align: center; font-size: 25px; color: rgba(50,28,8,.6); pointer-events: none; }
+.adds button:hover, .adds button:focus-visible { background: var(--ink); color: var(--paper); }
+.hint { position: absolute; left: 0; right: 0; top: 230px; padding: 0 36px; text-align: center; font-size: 17px; line-height: 1.6; color: rgba(38,40,43,.42); pointer-events: none; }
 .zone:has(.item) .hint { display: none; }
 
 /* ---------- things on the wall ---------- */
@@ -77,88 +119,106 @@ h1 { margin: 0; font-size: clamp(46px, 7vw, 80px); font-weight: 700; color: #fff
   position: absolute; color: var(--ink); cursor: grab; user-select: none; touch-action: none;
   transform: rotate(var(--r)); transition: transform .15s, filter .15s;
 }
-.item:hover { filter: drop-shadow(0 6px 6px rgba(0,0,0,.2)); }
-.item.dragging { cursor: grabbing; transform: rotate(var(--r)) scale(1.06); filter: drop-shadow(0 18px 16px rgba(0,0,0,.35)); }
-.item.selected { outline: 2px dashed rgba(255,255,255,.75); outline-offset: 6px; }
+.item:hover { filter: drop-shadow(0 6px 6px rgba(0,0,0,.12)); }
+.item.dragging { cursor: grabbing; transform: rotate(var(--r)) scale(1.05); filter: drop-shadow(0 18px 16px rgba(0,0,0,.25)); }
+.item.selected { outline: 1.5px dashed rgba(38,40,43,.6); outline-offset: 6px; }
 .txt { white-space: pre-wrap; overflow-wrap: anywhere; outline: none; min-height: 1em; }
-.txt:empty::before { content: attr(data-ph); opacity: .45; }
-.txt[contenteditable] { cursor: text; user-select: text; background: rgba(255,255,255,.4); border-radius: 3px; }
+.txt:empty::before { content: attr(data-ph); opacity: .42; }
+.txt[contenteditable] { cursor: text; user-select: text; background: rgba(255,255,255,.45); border-radius: 3px; }
 
 .note {
-  width: 180px; min-height: 170px; padding: 28px 16px 16px; background: var(--bg);
-  font-size: 25px; line-height: 1.15;
-  box-shadow: 0 10px 14px -6px rgba(0,0,0,.45), inset 0 -20px 26px -20px rgba(0,0,0,.15);
+  width: 180px; min-height: 168px; padding: 26px 16px 16px; background: var(--grain) var(--bg);
+  font-family: 'Zen Kurenaido', sans-serif; font-size: 20px; line-height: 1.35;
+  box-shadow: 0 10px 16px -8px rgba(0,0,0,.35);
 }
 .quote {
-  width: 250px; padding: 30px 16px 18px 34px; font-family: 'Special Elite', monospace; font-size: 15.5px; line-height: 24px;
-  background: #fffdf7 repeating-linear-gradient(transparent 0 23px, #bcd5ea 23px 24px); background-position: 0 6px;
-  box-shadow: 0 8px 14px -6px rgba(0,0,0,.45);
+  width: 250px; padding: 24px 22px 34px; background: var(--grain) #f7f2e6;
+  font-size: 15px; line-height: 1.75; box-shadow: 0 10px 16px -8px rgba(0,0,0,.35);
+  border-left: 5px solid #26282b;
 }
-.quote::after { content: ''; position: absolute; top: 0; bottom: 0; left: 24px; width: 1px; background: #e8a0a0; }
-.photo { width: 220px; padding: 10px 10px 0; background: #fbfbf8; box-shadow: 0 10px 16px -6px rgba(0,0,0,.5); }
-.photo img { display: block; width: 100%; min-height: 120px; max-height: 280px; object-fit: cover; background: #d8d2c6; pointer-events: none; }
-.photo .txt { min-height: 46px; padding: 6px 2px 8px; font-size: 23px; line-height: 1.1; text-align: center; }
+.quote .hanko { position: absolute; right: 12px; bottom: 10px; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 3px; background: var(--verm); color: #f8efe6; font-size: 12px; transform: rotate(-6deg); }
+.photo { width: 220px; padding: 10px 10px 0; background: #fbfaf6; box-shadow: 0 12px 18px -8px rgba(0,0,0,.4); }
+.photo img { display: block; width: 100%; min-height: 120px; max-height: 280px; object-fit: cover; background: #dcd8cf; pointer-events: none; }
+.photo .txt { min-height: 42px; padding: 7px 2px 9px; font-family: 'Zen Kurenaido', sans-serif; font-size: 17px; line-height: 1.3; text-align: center; }
 .fresh img { animation: develop 3s ease-out; }
-@keyframes develop { from { filter: brightness(1.9) sepia(.7) blur(2px); } }
-
-.pin {
-  position: absolute; top: 7px; left: 50%; z-index: 1; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #fff9 0 2px, var(--pc) 3px, color-mix(in srgb, var(--pc), #000 40%) 100%);
-  box-shadow: 2px 4px 4px rgba(0,0,0,.35);
-}
+@keyframes develop { from { filter: brightness(1.9) sepia(.6) blur(2px); } }
 .tape {
-  position: absolute; top: -13px; left: 50%; z-index: 1; width: 92px; height: 27px; margin-left: -46px;
-  background: rgba(255,248,215,.6); transform: rotate(-4deg); box-shadow: 0 1px 2px rgba(0,0,0,.15);
+  position: absolute; top: -11px; left: 50%; z-index: 1; width: 84px; height: 24px; margin-left: -42px; transform: rotate(-3deg);
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.18) 0 4px, transparent 4px 9px), var(--tc);
 }
 .tools {
   position: absolute; top: -50px; left: 50%; z-index: 2; display: none; gap: 2px; padding: 4px; white-space: nowrap;
-  background: #2b2118; border-radius: 22px; box-shadow: 0 4px 12px rgba(0,0,0,.4);
+  background: var(--ink); border-radius: 22px; box-shadow: 0 4px 12px rgba(0,0,0,.3);
   transform: translateX(-50%) rotate(calc(-1 * var(--r)));
 }
 .selected .tools { display: flex; }
-.tools button { width: 36px; height: 36px; border: 0; border-radius: 50%; background: none; color: #fff; font-size: 17px; }
+.tools button { width: 36px; height: 36px; border: 0; border-radius: 50%; background: none; color: #fff; font-size: 16px; }
 .tools button:hover, .tools button:focus-visible { background: rgba(255,255,255,.16); }
 
 /* ---------- lightbox ---------- */
-.lightbox { position: fixed; inset: 0; z-index: 2000000; display: none; place-items: center; padding: 24px; background: rgba(10,8,6,.9); cursor: zoom-out; }
+.lightbox { position: fixed; inset: 0; z-index: 2000000; display: none; place-items: center; padding: 24px; background: rgba(20,22,24,.88); cursor: zoom-out; }
 .lightbox.open { display: grid; }
-.lightbox figure { margin: 0; padding: 14px 14px 0; background: #fbfbf8; transform: rotate(-1deg); max-width: 100%; }
+.lightbox figure { max-width: 100%; margin: 0; padding: 14px 14px 0; background: #fbfaf6; }
 .lightbox img { display: block; max-width: 100%; max-height: 78vh; }
-.lightbox figcaption { min-height: 50px; padding: 8px; text-align: center; color: var(--ink); font-size: 30px; }
+.lightbox figcaption { min-height: 46px; padding: 10px; text-align: center; font-family: 'Zen Kurenaido', sans-serif; font-size: 22px; }
 
 /* ---------- lock screen ---------- */
 .lock { position: fixed; inset: 0; z-index: 3000000; display: grid; place-items: center; padding: 16px; overflow: auto; }
 .card {
-  position: relative; width: min(430px, 100%); padding: 38px 28px 26px; background: var(--paper); color: var(--ink);
-  font-size: 22px; transform: rotate(-1.2deg); box-shadow: 0 22px 55px rgba(0,0,0,.6);
+  position: relative; width: min(430px, 100%); padding: 40px 30px 26px; background: var(--grain) var(--paper);
+  font-size: 16px; box-shadow: 0 24px 60px rgba(0,0,0,.25); border-top: 6px solid var(--ink);
 }
-.card h2 { margin: 0; font-size: 46px; text-align: center; }
-.card p { margin: 0 0 14px; text-align: center; }
-.card label { display: block; }
+.card .stamp { position: absolute; top: 18px; right: 20px; font-size: 44px; }
+.card h2 { margin: 0 0 4px; font-size: 32px; letter-spacing: .04em; }
+.card p { margin: 0 0 20px; opacity: .65; }
+.card label { display: block; font-size: 14px; letter-spacing: .05em; }
 .card input:not([type=checkbox]) {
-  display: block; width: 100%; margin: 2px 0 12px; padding: 10px 12px; font: 17px system-ui, sans-serif;
-  background: #fff; border: 1.5px solid #cdbfa8; border-radius: 6px;
+  display: block; width: 100%; margin: 4px 0 14px; padding: 10px 12px; font: 16px system-ui, sans-serif;
+  background: #fffdf8; border: 1px solid #cfc6b4; border-radius: 3px;
 }
-.card label.chk { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; font-size: 21px; }
-.card ol { margin: 0 0 14px; padding-left: 20px; font: 14.5px/1.5 system-ui, sans-serif; }
-.card a { color: #9c3523; }
-.primary { width: 100%; padding: 10px; border: 0; border-radius: 6px; background: #b3412f; color: #fff; font-size: 25px; }
+.card label.chk { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }
+.card ol { margin: 0 0 14px; padding-left: 20px; font: 13.5px/1.55 system-ui, sans-serif; }
+.card a { color: var(--verm); }
+.primary { width: 100%; padding: 11px; border: 0; border-radius: 3px; background: var(--ink); color: var(--paper) !important; font-size: 17px; letter-spacing: .08em; }
 .primary:disabled { opacity: .6; cursor: wait; }
-.err { min-height: 1.3em; margin-top: 8px; color: #b3412f; font-size: 21px; text-align: center; }
+.err { min-height: 1.3em; margin-top: 10px; color: var(--verm); font-size: 15px; text-align: center; }
 .setup-only { display: none; }
 .card.setup .setup-only { display: block; }
 .card.setup .unlock-only { display: none; }
 .shake { animation: shake .4s; }
-@keyframes shake { 25% { transform: translateX(-8px) rotate(-1.2deg); } 75% { transform: translateX(8px) rotate(-1.2deg); } }
+@keyframes shake { 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
 </style>
 </head>
 <body>
 
+<!-- shared brush/paper filters used by every painting -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="f-brush" x="-25%" y="-40%" width="150%" height="180%"><feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="3" seed="3"/><feDisplacementMap in="SourceGraphic" scale="10" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <filter id="f-rough" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="7"/><feDisplacementMap in="SourceGraphic" scale="7" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <filter id="f-paper" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="4" seed="2"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .45  0 0 0 0 .35  0 0 0 .45 0"/></filter>
+    <filter id="f-mist" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="7"/></filter>
+    <linearGradient id="g-sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fb0a6"/><stop offset=".35" stop-color="#4f8a84"/><stop offset="1" stop-color="#1b4a4b"/></linearGradient>
+    <linearGradient id="g-sky1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e0d1ab"/><stop offset=".6" stop-color="#f1e8d0"/></linearGradient>
+    <linearGradient id="g-mtn-a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#93b5aa"/><stop offset="1" stop-color="#d4dfd3"/></linearGradient>
+    <linearGradient id="g-mtn-b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6a958b"/><stop offset="1" stop-color="#a9c1b8"/></linearGradient>
+    <linearGradient id="g-fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#efe6d2" stop-opacity="0"/><stop offset="1" stop-color="#efe6d2" stop-opacity=".75"/></linearGradient>
+    <radialGradient id="g-vig" cx=".5" cy=".45" r=".78"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#3a2a10" stop-opacity=".3"/></radialGradient>
+    <radialGradient id="g-sun"><stop offset="0" stop-color="#d9673f"/><stop offset=".85" stop-color="#b8452f"/><stop offset="1" stop-color="#a33a29"/></radialGradient>
+    <linearGradient id="g-sky2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ecdfbf"/><stop offset=".5" stop-color="#f3e9d3"/><stop offset="1" stop-color="#ead8bb"/></linearGradient>
+    <radialGradient id="g-moon"><stop offset="0" stop-color="#fffdf6"/><stop offset=".8" stop-color="#f8f1e2"/><stop offset="1" stop-color="#efe4cf"/></radialGradient>
+    <linearGradient id="g-sky3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d8c9b8"/><stop offset="1" stop-color="#efe6d8"/></linearGradient>
+    <linearGradient id="g-sky4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef0e6"/><stop offset="1" stop-color="#dde3d3"/></linearGradient>
+    <linearGradient id="g-bam" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1f4236"/><stop offset=".3" stop-color="#5a8a6d"/><stop offset=".45" stop-color="#86b393"/><stop offset="1" stop-color="#284f40"/></linearGradient>
+    <linearGradient id="g-bam2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6a8c79"/><stop offset=".45" stop-color="#a6c3ae"/><stop offset="1" stop-color="#6d8f7c"/></linearGradient>
+  </defs>
+</svg>
+
 <div id="lock" class="lock" hidden>
   <form id="lockForm" class="card" autocomplete="off">
-    <div class="tape"></div>
+    <span class="stamp">縁</span>
     <h2>Our Wonder Wall</h2>
-    <p class="unlock-only">Just for the two of us 🔒</p>
+    <p class="unlock-only">Just for the two of us.</p>
     <p class="setup-only">First time here. Let's put up the wall.</p>
     <label>Password <input type="password" id="pw" required></label>
     <div class="setup-only">
@@ -179,38 +239,54 @@ h1 { margin: 0; font-size: clamp(46px, 7vw, 80px); font-weight: 700; color: #fff
 
 <main id="app" hidden>
   <header>
-    <div class="lights" id="lights"></div>
     <div class="bar"><span id="status" role="status"></span><button id="lockBtn">Lock</button></div>
-    <h1>Our Wonder Wall</h1>
+    <h1>Our Wonder Wall <span class="stamp">縁</span></h1>
     <p class="sub">what we have · who we are · what we dream of</p>
   </header>
-  <div class="frame"><div class="wall" id="wall"></div></div>
+  <div class="room">
+    <aside class="kake" id="kake">
+      <div class="nail"></div>
+      <div class="sway">
+        <svg class="hanger" viewBox="0 0 100 62" preserveAspectRatio="none" aria-hidden="true"><path d="M3 62 L50 2 L97 62" fill="none" stroke="#5a5550" stroke-width="1.2" vector-effect="non-scaling-stroke"/></svg>
+        <div class="rod"></div>
+        <div class="art" id="art"></div>
+        <div class="rod bottom"></div>
+      </div>
+      <button class="change" id="changeArt">change painting</button>
+      <div class="picker" id="picker" hidden>
+        <div class="opts" id="opts"></div>
+        <button class="own" id="ownArt">Use our own picture…</button>
+      </div>
+    </aside>
+    <div class="wall" id="wall"></div>
+  </div>
 </main>
 
 <div class="lightbox" id="lightbox"><figure><img alt=""><figcaption></figcaption></figure></div>
 <input type="file" id="file" accept="image/*" multiple hidden>
+<input type="file" id="artFile" accept="image/*" hidden>
 
 <script>
-// Everything (text, positions, photos, GitHub token) is AES-GCM encrypted in the browser
-// with a key derived from the shared password, then committed to this repo via the GitHub API.
+// Everything (text, positions, photos, painting choice, GitHub token) is AES-GCM encrypted in the
+// browser with a key derived from the shared password, then committed to this repo via the GitHub API.
 const OWNER = 'amirh0ss3in', REPO = 'wonderwall', BRANCH = 'main';
 const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/`;
 const ZONES = [
-  { id: 'gratitude', title: 'Gratitude ❤️', sub: 'what we already have', color: '#b3412f',
+  { id: 'gratitude', kanji: '感謝', title: 'Gratitude', sub: 'what we already have', color: '#b5442f',
     hint: "The people we love, moments we've shared, the little things we're thankful for…" },
-  { id: 'present', title: 'Present', sub: 'who we are today', color: '#2f7a6d',
+  { id: 'present', kanji: '今', title: 'Present', sub: 'who we are today', color: '#2f6f6a',
     hint: 'Our passions, achievements, values, the things that make us happy…' },
-  { id: 'aspirations', title: 'Aspirations', sub: 'what we dream of', color: '#6a3fa0',
+  { id: 'aspirations', kanji: '夢', title: 'Aspirations', sub: 'what we dream of', color: '#3b4a6b',
     hint: 'Places to go, things to do, the people we want to become…' },
 ];
-const NOTE_COLORS = ['#fff59d', '#ffcdd2', '#c8e6c9', '#bbdefb', '#ffe0b2', '#e1bee7'];
-const PIN_COLORS = ['#d93a3a', '#2e86de', '#27ae60', '#f39c12', '#8e44ad'];
+const NOTE_COLORS = ['#f3ecd9', '#dfe8df', '#d6e6e3', '#f2dede', '#e3e1ee', '#ecdfc8'];
+const TAPES = ['rgba(47,111,106,.6)', 'rgba(181,68,47,.5)', 'rgba(190,175,140,.65)', 'rgba(59,74,107,.5)'];
 const WIDTH = { photo: 220, note: 180, quote: 250 };
 const PLACEHOLDER = { photo: 'add a caption…', note: 'write something…', quote: '"a line that moves us" — someone' };
 
 const $ = id => document.getElementById(id);
 const enc = new TextEncoder(), dec = new TextDecoder();
-let key, salt, token, vaultBytes, vaultSha, items = [], maxZ = 1, dirty = false, timer = null, addZone;
+let key, salt, token, vaultBytes, vaultSha, items = [], scroll = 'pine', maxZ = 1, dirty = false, timer = null, addZone;
 let queue = Promise.resolve();
 const urls = {};
 
@@ -261,11 +337,11 @@ const serial = fn => (queue = queue.catch(() => {}).then(fn)); // one commit at 
 
 // ---------- vault ----------
 async function saveVault() {
-  vaultSha = await ghPut('vault.enc', cat(salt, await seal(enc.encode(JSON.stringify({ token, items })))), vaultSha);
+  vaultSha = await ghPut('vault.enc', cat(salt, await seal(enc.encode(JSON.stringify({ token, items, scroll })))), vaultSha);
 }
 async function openVault() {
   const d = JSON.parse(dec.decode(await unseal(vaultBytes.subarray(16))));
-  token = d.token; items = d.items || [];
+  token = d.token; items = d.items || []; scroll = d.scroll || 'pine';
 }
 function saveSoon() {
   dirty = true; status('unsaved…'); clearTimeout(timer);
@@ -348,8 +424,8 @@ function buildWall() {
   for (const z of ZONES) {
     const el = document.createElement('section');
     el.className = 'zone'; el.id = 'z-' + z.id; el.style.setProperty('--zc', z.color);
-    el.innerHTML = `<div class="zhead"><div class="label">${z.title}<small>${z.sub}</small></div>
-      <div class="adds"><button data-add="photo" title="Pin a photo" aria-label="Pin a photo">📷</button><button data-add="note" title="Stick a note" aria-label="Stick a note">📝</button><button data-add="quote" title="Add a quote" aria-label="Add a quote">❝</button></div></div>
+    el.innerHTML = `<div class="zhead"><div class="label"><span class="kanji">${z.kanji}</span><span><b>${z.title}</b><small>${z.sub}</small></span></div>
+      <div class="adds"><button data-add="photo">+ photo</button><button data-add="note">+ note</button><button data-add="quote">+ quote</button></div></div>
       <p class="hint">${z.hint}</p>`;
     el.querySelector('.adds').onclick = e => {
       const t = e.target.closest('button')?.dataset.add;
@@ -360,6 +436,7 @@ function buildWall() {
 }
 function showWall() {
   $('lock').hidden = true; $('app').hidden = false;
+  showScroll();
   maxZ = Math.max(1, ...items.map(i => i.z || 1));
   for (const it of items) $('z-' + it.zone).append(makeEl(it));
   fitAll();
@@ -372,13 +449,14 @@ function place(el, it) {
 function makeEl(it) {
   const el = document.createElement('div');
   el.className = 'item ' + it.type; el.id = 'i-' + it.id; place(el, it);
-  el.style.setProperty('--pc', PIN_COLORS[parseInt(it.id.slice(0, 6), 16) % PIN_COLORS.length]);
-  if (it.type === 'note') el.style.setProperty('--bg', it.color);
-  el.innerHTML = (it.type === 'photo' ? '<div class="tape"></div><img alt="">' : '<div class="pin"></div>') +
+  el.style.setProperty('--tc', TAPES[parseInt(it.id.slice(0, 6), 16) % TAPES.length]);
+  if (it.type === 'note') el.style.setProperty('--bg', NOTE_COLORS.includes(it.color) ? it.color : NOTE_COLORS[0]);
+  el.innerHTML = (it.type === 'quote' ? '<span class="hanko">言</span>' : '<div class="tape"></div>') +
+    (it.type === 'photo' ? '<img alt="">' : '') +
     '<div class="txt"></div><div class="tools"><button data-t="edit" title="Write" aria-label="Write">✎</button>' +
-    (it.type === 'note' ? '<button data-t="color" title="Change color" aria-label="Change color">🎨</button>' : '') +
-    (it.type === 'photo' ? '<button data-t="view" title="Look closer" aria-label="Look closer">🔍</button>' : '') +
-    '<button data-t="del" title="Take down" aria-label="Take down">🗑</button></div>';
+    (it.type === 'note' ? '<button data-t="color" title="Change paper" aria-label="Change paper">◐</button>' : '') +
+    (it.type === 'photo' ? '<button data-t="view" title="Look closer" aria-label="Look closer">⤢</button>' : '') +
+    '<button data-t="del" title="Take down" aria-label="Take down">✕</button></div>';
   const txt = el.querySelector('.txt');
   txt.textContent = it.text; txt.dataset.ph = PLACEHOLDER[it.type];
   if (it.type === 'photo') {
@@ -400,12 +478,12 @@ function makeEl(it) {
   el.onpointerdown = e => drag(e, el, it);
   return el;
 }
+const headBottom = zone => { const h = zone.querySelector('.zhead'); return h.offsetTop + h.offsetHeight + 24; };
 function fit(zone) {
   let h = 0;
   for (const el of zone.querySelectorAll('.item')) h = Math.max(h, el.offsetTop + el.offsetHeight);
-  zone.style.minHeight = Math.max(560, h + 80) + 'px';
+  zone.style.minHeight = Math.max(600, h + 80) + 'px';
 }
-const headBottom = zone => { const h = zone.querySelector('.zhead'); return h.offsetTop + h.offsetHeight + 24; };
 const fitAll = () => document.querySelectorAll('.zone').forEach(fit);
 addEventListener('resize', fitAll);
 
@@ -413,7 +491,7 @@ function newItem(type, zone) {
   const zw = $('z-' + zone).clientWidth;
   const it = { id: uid(), type, zone, text: '', z: ++maxZ,
     x: Math.random() * Math.max(0, 1 - (WIDTH[type] + 24) / zw), y: headBottom($('z-' + zone)) + Math.random() * 160,
-    rot: +(Math.random() * 8 - 4).toFixed(1) };
+    rot: +(Math.random() * 5 - 2.5).toFixed(1) };
   if (type === 'note') it.color = NOTE_COLORS[Math.floor(Math.random() * NOTE_COLORS.length)];
   return it;
 }
@@ -426,7 +504,10 @@ function select(id) {
   document.querySelectorAll('.item.selected').forEach(e => e.classList.remove('selected'));
   if (id) $('i-' + id)?.classList.add('selected');
 }
-document.addEventListener('pointerdown', e => { if (!e.target.closest('.item')) select(null); });
+document.addEventListener('pointerdown', e => {
+  if (!e.target.closest('.item')) select(null);
+  if (!e.target.closest('#picker, #changeArt')) $('picker').hidden = true;
+});
 
 function edit(it) {
   const el = $('i-' + it.id), txt = el.querySelector('.txt');
@@ -444,10 +525,11 @@ function edit(it) {
 function remove(it, quiet) {
   if (!quiet && !confirm('Take this off the wall?')) return;
   items = items.filter(i => i !== it); $('i-' + it.id)?.remove();
-  // ponytail: if this delete fails the encrypted photo stays orphaned in img/; harmless, just repo space
-  if (it.imgSha) serial(() => ghDel('img/' + it.img + '.enc', it.imgSha)).catch(() => {});
+  dropImg(it);
   saveSoon();
 }
+// ponytail: if this delete fails the encrypted image stays orphaned in img/; harmless, just repo space
+function dropImg(o) { if (o?.imgSha) serial(() => ghDel('img/' + o.img + '.enc', o.imgSha)).catch(() => {}); }
 function drag(e, el, it) {
   if (e.button > 0 || e.target.closest('.tools') || e.target.isContentEditable) return;
   e.preventDefault();
@@ -472,8 +554,8 @@ function drag(e, el, it) {
 }
 
 // ---------- photos ----------
-async function loadImg(it) {
-  return urls[it.img] ??= URL.createObjectURL(new Blob([await unseal(await ghGet('img/' + it.img + '.enc', true))], { type: 'image/jpeg' }));
+async function loadImg(o) {
+  return urls[o.img] ??= URL.createObjectURL(new Blob([await unseal(await ghGet('img/' + o.img + '.enc', true))], { type: 'image/jpeg' }));
 }
 async function shrink(file) {
   const bmp = await createImageBitmap(file), s = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
@@ -482,21 +564,24 @@ async function shrink(file) {
   c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
   return new Promise((ok, no) => c.toBlob(b => b ? ok(b) : no(new Error('encode failed')), 'image/jpeg', 0.85));
 }
-async function addPhoto(file, zone) {
-  const it = newItem('photo', zone); it.img = uid();
+// shrink, show right away, upload encrypted; returns { img, imgSha } or null
+async function uploadImage(file, onShown) {
   let jpg;
-  try { jpg = await shrink(file); } catch { return alert(`Couldn't read ${file.name}.`); }
-  urls[it.img] = URL.createObjectURL(jpg);
-  const el = makeEl(it); el.classList.add('fresh');
-  items.push(it); $('z-' + zone).append(el);
-  status('uploading photo…');
-  try {
-    it.imgSha = await serial(async () => ghPut('img/' + it.img + '.enc', await seal(new Uint8Array(await jpg.arrayBuffer()))));
-  } catch {
-    items = items.filter(i => i !== it); el.remove();
-    return status('⚠ photo upload failed');
-  }
-  saveSoon();
+  try { jpg = await shrink(file); } catch { alert(`Couldn't read ${file.name}.`); return null; }
+  const img = uid(); urls[img] = URL.createObjectURL(jpg); onShown?.(img);
+  status('uploading picture…');
+  try { return { img, imgSha: await serial(async () => ghPut('img/' + img + '.enc', await seal(new Uint8Array(await jpg.arrayBuffer())))) }; }
+  catch { status('⚠ picture upload failed'); return null; }
+}
+async function addPhoto(file, zone) {
+  const it = newItem('photo', zone);
+  let el;
+  const up = await uploadImage(file, img => {
+    it.img = img; el = makeEl(it); el.classList.add('fresh');
+    items.push(it); $('z-' + zone).append(el);
+  });
+  if (!up) { items = items.filter(i => i !== it); return el?.remove(); }
+  it.imgSha = up.imgSha; saveSoon();
 }
 $('file').onchange = async e => {
   const files = [...e.target.files]; e.target.value = '';
@@ -509,22 +594,284 @@ function openLightbox(it) {
   lb.classList.add('open');
 }
 $('lightbox').onclick = () => $('lightbox').classList.remove('open');
-document.addEventListener('keydown', e => { if (e.key === 'Escape') $('lightbox').classList.remove('open'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { $('lightbox').classList.remove('open'); $('picker').hidden = true; } });
 
-// ---------- string lights ----------
-function hangLights() {
-  const L = $('lights'), n = Math.max(10, Math.round(innerWidth / 60)), C = ['#ffd36b', '#ff8a65', '#81d4fa', '#aed581', '#f48fb1'];
-  L.innerHTML = '<svg viewBox="0 0 100 70" preserveAspectRatio="none"><path d="M0,4 Q50,64 100,4" fill="none" stroke="#2a2a2a" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>';
-  for (let i = 0; i < n; i++) {
-    const t = (i + 0.5) / n, y = (1 - t) ** 2 * 4 + 2 * (1 - t) * t * 64 + t * t * 4, b = document.createElement('i');
-    b.className = 'bulb'; b.style.left = t * 100 + '%'; b.style.top = y / 70 * 100 + '%';
-    b.style.setProperty('--c', C[i % C.length]); b.style.setProperty('--d', (i * 0.37 % 3).toFixed(2) + 's');
-    L.append(b);
+// ---------- paintings for the scroll (original, procedurally drawn ink-wash pieces) ----------
+const R = seed => { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; };
+const f1 = n => +n.toFixed(1);
+const P = pts => pts.map(p => f1(p[0]) + ' ' + f1(p[1])).join('L');
+const bez = (c, t) => { const u = 1 - t; return [0, 1].map(k => u * u * u * c[0][k] + 3 * u * u * t * c[1][k] + 3 * u * t * t * c[2][k] + t * t * t * c[3][k]); };
+const curve = (c, n = 20) => Array.from({ length: n + 1 }, (_, i) => bez(c, i / n));
+const normals = pts => pts.map((p, i) => {
+  const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)];
+  const dx = b[0] - a[0], dy = b[1] - a[1], d = Math.hypot(dx, dy) || 1;
+  return [-dy / d, dx / d];
+});
+// tapered brush stroke along a polyline
+function limb(pts, w0, w1) {
+  const N = normals(pts), L = [], Q = [];
+  pts.forEach((p, i) => { const w = (w0 + (w1 - w0) * i / (pts.length - 1)) / 2; L.push([p[0] + N[i][0] * w, p[1] + N[i][1] * w]); Q.push([p[0] - N[i][0] * w, p[1] - N[i][1] * w]); });
+  return 'M' + P(L) + 'L' + P(Q.reverse()) + 'Z';
+}
+// bark: broken lines running along a limb, plus a lit edge
+function bark(r, pts, w0, w1, col, lit) {
+  const N = normals(pts); let d = '', e = '';
+  for (let j = 0; j < 5; j++) {
+    const o = (r() - .5) * .7;
+    d += 'M' + P(pts.map((p, i) => { const w = (w0 + (w1 - w0) * i / (pts.length - 1)) / 2; return [p[0] + N[i][0] * w * o + (r() - .5), p[1] + N[i][1] * w * o + (r() - .5)]; }));
   }
+  e = 'M' + P(pts.map((p, i) => { const w = (w0 + (w1 - w0) * i / (pts.length - 1)) / 2; return [p[0] - N[i][0] * w * .62, p[1] - N[i][1] * w * .62]; }));
+  return `<path d="${d}" stroke="${col}" stroke-width=".8" fill="none" stroke-dasharray="9 5 3 7" opacity=".7"/><path d="${e}" stroke="${lit}" stroke-width="1.4" fill="none" stroke-dasharray="14 4 6 3" opacity=".55"/>`;
+}
+// midpoint-displacement ridgeline through control points
+function ridge(r, ctrl, amp, levels = 6, rough = .55) {
+  let pts = ctrl, a = amp;
+  for (let l = 0; l < levels; l++) {
+    const nx = [];
+    for (let i = 0; i < pts.length - 1; i++) { const [x0, y0] = pts[i], [x1, y1] = pts[i + 1]; nx.push(pts[i], [(x0 + x1) / 2, (y0 + y1) / 2 + (r() - .5) * a]); }
+    nx.push(pts[pts.length - 1]); pts = nx; a *= rough;
+  }
+  return pts;
+}
+const land = (pts, bottom = 600) => `M${P(pts)}L300 ${bottom}L0 ${bottom}Z`;
+// fans of short needle strokes scattered inside an ellipse
+function tufts(r, cx, cy, rx, ry, count, len, col, sw, spread = 2.2) {
+  let d = '';
+  for (let i = 0; i < count; i++) {
+    const a = r() * Math.PI * 2, k = Math.sqrt(r()), x = cx + Math.cos(a) * rx * k, y = cy + Math.sin(a) * ry * k;
+    const base = -Math.PI / 2 + (x - cx) / rx * 1.1, m = 6 + (r() * 5 | 0);
+    for (let j = 0; j < m; j++) { const g = base + (r() - .5) * spread, l = len * (.55 + r() * .6); d += `M${f1(x)} ${f1(y)}l${f1(Math.cos(g) * l)} ${f1(Math.sin(g) * l)}`; }
+  }
+  return `<path d="${d}" stroke="${col}" stroke-width="${sw}" stroke-linecap="round" fill="none"/>`;
+}
+function pinePad(r, x, y, rx, ry) {
+  const A = rx * ry;
+  return `<ellipse cx="${x}" cy="${y + ry * .15}" rx="${rx * .92}" ry="${ry * .8}" fill="#173d3a" filter="url(#f-brush)"/>` +
+    tufts(r, x, y + ry * .2, rx, ry * .9, A / 26, 9, '#183f3c', 1.2) +
+    tufts(r, x, y, rx * .95, ry * .85, A / 28, 8.5, '#2b625b', 1.05) +
+    tufts(r, x - rx * .08, y - ry * .35, rx * .8, ry * .55, A / 45, 7.5, '#4f8c80', .95) +
+    tufts(r, x - rx * .15, y - ry * .55, rx * .55, ry * .35, A / 110, 6, '#94c2b1', .75);
+}
+const paperBase = fill => `<rect width="300" height="600" fill="${fill}"/><rect width="300" height="600" filter="url(#f-paper)" opacity=".5"/>`;
+const finish = `<rect width="300" height="600" filter="url(#f-paper)" opacity=".22"/><rect width="300" height="600" fill="url(#g-vig)"/>`;
+const glyph = (ch, x, y, s = 36) => `<text x="${x}" y="${y}" text-anchor="middle" font-family="Shippori Mincho, serif" font-size="${s}" fill="#4f4a40" opacity=".6">${ch}</text>`;
+const hanko = (x, y) => `<g transform="rotate(-4 ${x + 8} ${y + 8})"><rect x="${x}" y="${y}" width="16" height="16" rx="2" fill="#b5442f" opacity=".85"/><rect x="${x + 3}" y="${y + 3}" width="10" height="10" fill="none" stroke="#f3e6d8" stroke-width=".9" opacity=".8"/></g>`;
+const ripples = (r, y0, y1, n, col, op) => {
+  let s = '';
+  for (let i = 0; i < n; i++) { const t = r(), y = y0 + t * t * (y1 - y0), w = 4 + t * 55 * r() + 4, x = r() * 300; s += `<path d="M${f1(x)} ${f1(y)}h${f1(w)}" stroke="${col}" stroke-width="${f1(.5 + t)}" opacity="${f1(op * (.4 + r() * .6))}"/>`; }
+  return s;
+};
+
+const PAINTINGS = {
+  pine: { name: 'Pine', draw() {
+    const r = R(42);
+    const trunk = [...curve([[232, 456], [241, 416], [214, 386], [203, 352]], 12), ...curve([[203, 352], [192, 322], [206, 300], [193, 272]], 10).slice(1), ...curve([[193, 272], [183, 246], [160, 232], [150, 212]], 10).slice(1)];
+    const br = [
+      [[[193, 276], [206, 262], [226, 250], [241, 228]], 7, 2], [[[199, 318], [176, 311], [140, 296], [86, 310]], 8, 2],
+      [[[157, 223], [141, 214], [122, 214], [103, 221]], 5, 1.5], [[[150, 213], [155, 195], [168, 184], [183, 175]], 6, 2],
+      [[[203, 352], [222, 340], [240, 346], [258, 337]], 5, 1.5], [[[183, 176], [162, 168], [144, 160], [132, 150]], 3, 1],
+      [[[183, 176], [200, 172], [220, 176], [238, 186]], 3.5, 1],
+    ];
+    let limbs = limb(trunk, 18, 6), barkS = bark(r, trunk, 18, 6, '#3f625e', '#6f8f86');
+    for (const [c, a, b] of br) { const pts = curve(c, 12); limbs += limb(pts, a, b); if (a > 4) barkS += bark(r, pts, a, b, '#3f625e', '#6f8f86'); }
+    const far = ridge(r, [[0, 392], [40, 372], [72, 384], [112, 348], [142, 366], [172, 342], [212, 370], [252, 356], [300, 378]], 14);
+    const mid = ridge(r, [[0, 412], [50, 398], [96, 410], [140, 394], [190, 408], [236, 398], [300, 410]], 8);
+    const isl1 = ridge(r, [[14, 476], [36, 464], [58, 468], [80, 462], [96, 476]], 5, 4);
+    const isl2 = ridge(r, [[30, 530], [52, 512], [74, 508], [96, 516], [120, 512], [138, 530]], 7, 4);
+    return paperBase('url(#g-sky1)') +
+      `<ellipse cx="80" cy="150" rx="90" ry="40" fill="#e6d9b8" opacity=".55" filter="url(#f-mist)"/><ellipse cx="240" cy="90" rx="70" ry="28" fill="#f6efdc" opacity=".7" filter="url(#f-mist)"/>` +
+      glyph('永', 104, 112) +
+      `<path d="${land(far, 440)}" fill="url(#g-mtn-a)" filter="url(#f-rough)"/>` +
+      `<rect y="378" width="300" height="50" fill="url(#g-fade)"/>` +
+      `<path d="${land(mid, 440)}" fill="url(#g-mtn-b)" filter="url(#f-rough)"/>` +
+      `<rect y="404" width="300" height="30" fill="#efe6d2" opacity=".45" filter="url(#f-mist)"/>` +
+      `<rect y="430" width="300" height="170" fill="url(#g-sea)"/><path d="M0 430.5h300" stroke="#f3ecd6" stroke-width="1.2" opacity=".7"/>` +
+      ripples(r, 433, 600, 90, '#eee8d2', .55) + ripples(r, 440, 600, 50, '#173f40', .5) +
+      `<path d="M${P(isl1)}Z" fill="#3c6b68" opacity=".85" filter="url(#f-rough)"/>` + tufts(r, 55, 463, 30, 3, 14, 4, '#2c5653', .8) +
+      `<path d="M${P(isl2)}Z" fill="#1d4645" filter="url(#f-rough)"/>` + tufts(r, 84, 512, 40, 4, 26, 5, '#183c3a', .9) +
+      `<path d="M28 531 C60 535 100 534 140 531" stroke="#e8e1c8" stroke-width="1" opacity=".5" fill="none"/>` +
+      // cliff
+      `<g filter="url(#f-rough)">
+        <path d="M118 600 C121 570 132 540 150 522 C160 510 158 495 170 484 C182 470 196 462 212 458 C232 452 250 446 268 444 C285 442 295 440 300 440 L300 600Z" fill="#112d2c"/>
+        <path d="M150 600 C152 575 165 555 185 545 C200 538 214 540 226 530 L234 562 C218 576 200 590 192 600Z" fill="#234a48"/>
+        <path d="M200 470 C215 462 232 460 248 455 L258 480 C240 490 222 494 206 498Z" fill="#234a48"/>
+        <path d="M262 500 C275 494 288 492 300 490 L300 530 C288 528 276 530 266 534Z" fill="#1b3d3b"/>
+        <path d="M140 560 C148 546 160 540 172 536 C182 532 190 524 198 522 L192 540 C180 548 168 556 156 566 C150 571 144 572 140 568Z" fill="#d9caa0"/>
+        <path d="M176 500 C188 490 202 486 214 484 L210 500 C198 506 186 510 178 512Z" fill="#d9caa0"/>
+        <path d="M222 520 C236 512 248 512 258 504 L256 522 C244 530 232 532 222 534Z" fill="#d1c197"/>
+        <path d="M128 590 C136 582 146 580 156 576 L152 590 C144 594 134 596 128 596Z" fill="#cdbd93"/>
+        <path d="M240 470 C250 464 262 462 272 458 L270 470 C260 474 250 478 242 480Z" fill="#d9caa0"/>
+        <path d="M160 574 C170 566 180 562 190 560 L186 572 C178 576 170 580 162 582Z" fill="#a89b78"/>
+        <path d="M206 540 C214 534 222 532 230 530 L228 542 C220 546 212 548 206 550Z" fill="#a89b78"/>
+        <path d="M276 520 C284 514 292 512 300 510 L300 520 C292 522 284 524 278 528Z" fill="#c9b98f"/>
+      </g>
+      <g stroke="#0b1f1e" stroke-width="1" fill="none" opacity=".8"><path d="M170 520 l12 8 l6 14"/><path d="M215 505 l10 6 l4 12"/><path d="M245 535 l-6 14 l8 10"/><path d="M190 585 l10 -8"/><path d="M262 470 l8 12"/></g>
+      <g stroke="#f4eedb" stroke-width="1.1" fill="none" opacity=".6"><path d="M104 599 C116 593 124 590 134 592"/><path d="M96 590 C104 588 110 586 118 588"/><path d="M140 598 C150 596 158 597 166 599"/></g>` +
+      // shrubs on the rock
+      tufts(r, 238, 447, 46, 9, 70, 7, '#163a37', 1.1) + tufts(r, 236, 443, 40, 7, 45, 6, '#2b625b', 1) + tufts(r, 232, 440, 28, 4, 18, 5, '#5c9888', .8) +
+      tufts(r, 286, 488, 18, 6, 22, 6, '#1c4643', 1) + tufts(r, 160, 520, 14, 5, 16, 5, '#2b625b', .9) +
+      // tree
+      `<g filter="url(#f-rough)"><path d="${limbs}" fill="#0e2524"/></g>` + barkS +
+      pinePad(r, 182, 166, 86, 24) + pinePad(r, 140, 150, 40, 12) + pinePad(r, 112, 206, 56, 16) + pinePad(r, 246, 222, 46, 14) +
+      pinePad(r, 212, 188, 40, 11) + pinePad(r, 88, 302, 56, 16) + pinePad(r, 262, 334, 28, 9) +
+      hanko(22, 566) + finish;
+  } },
+
+  sun: { name: 'Red sun', draw() {
+    const r = R(7);
+    const layers = [
+      [[[0, 330], [50, 300], [92, 314], [150, 238], [206, 298], [252, 284], [300, 304]], 10, '#c4d5cd'],
+      [[[0, 352], [40, 340], [86, 356], [130, 330], [176, 350], [226, 320], [270, 338], [300, 330]], 16, '#a3bdb4'],
+      [[[0, 400], [60, 372], [110, 392], [160, 360], [214, 396], [260, 370], [300, 388]], 18, '#7ea198'],
+      [[[0, 452], [44, 430], [100, 448], [150, 420], [210, 452], [262, 428], [300, 440]], 16, '#567f78'],
+      [[[0, 500], [70, 478], [120, 494], [180, 470], [240, 496], [300, 482]], 14, '#335d58'],
+      [[[0, 560], [50, 534], [110, 550], [170, 528], [236, 552], [300, 536]], 12, '#16312f'],
+    ];
+    let s = paperBase('url(#g-sky2)') + glyph('和', 56, 102) +
+      `<circle cx="196" cy="190" r="70" fill="#d46a4c" opacity=".18" filter="url(#f-mist)"/><circle cx="196" cy="190" r="56" fill="url(#g-sun)"/><circle cx="196" cy="190" r="56" filter="url(#f-paper)" opacity=".35"/>` +
+      `<g fill="none" stroke="#f3e9d3" filter="url(#f-mist)"><path d="M96 206 C150 200 216 212 300 202" stroke-width="7" opacity=".75"/><path d="M130 176 C170 172 230 180 290 172" stroke-width="3" opacity=".6"/><path d="M60 250 C120 246 200 254 300 246" stroke-width="9" opacity=".5"/></g>`;
+    layers.forEach(([ctrl, amp, col], i) => {
+      const pts = ridge(r, ctrl, amp);
+      s += `<path d="${land(pts)}" fill="${col}" filter="url(#f-rough)"/>`;
+      if (i === 0) s += `<path d="M134 262 L150 238 L168 262 L160 257 L152 266 L144 256Z" fill="#f6f1e4" filter="url(#f-rough)"/>`;
+      if (i >= 3) { // little pines along the ridge
+        let d = '';
+        pts.forEach(([x, y], k) => { if (k % 2 || r() < .35) return; const h = (i - 1) * 3.2 * (.6 + r() * .6); d += `M${f1(x)} ${f1(y - h)}L${f1(x - h * .28)} ${f1(y - h * .45)}L${f1(x - h * .12)} ${f1(y - h * .45)}L${f1(x - h * .36)} ${f1(y + 1)}L${f1(x + h * .36)} ${f1(y + 1)}L${f1(x + h * .12)} ${f1(y - h * .45)}L${f1(x + h * .28)} ${f1(y - h * .45)}Z`; });
+        s += `<path d="${d}" fill="${col}"/>`;
+      }
+      if (i < layers.length - 1) s += `<rect y="${Math.min(...pts.map(p => p[1])) + 10}" width="300" height="70" fill="url(#g-fade)"/>`;
+    });
+    let birds = '';
+    for (let i = 0; i < 9; i++) { const x = 50 + r() * 90, y = 120 + r() * 90, w = 3 + r() * 5; birds += `M${f1(x - w)} ${f1(y - w * .5)}Q${f1(x - w * .4)} ${f1(y - w * .7)} ${f1(x)} ${f1(y)}Q${f1(x + w * .4)} ${f1(y - w * .7)} ${f1(x + w)} ${f1(y - w * .5)}`; }
+    return s + `<path d="${birds}" fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-linecap="round"/>` + hanko(262, 574) + finish;
+  } },
+
+  sakura: { name: 'Sakura', draw() {
+    const r = R(11), out = { limbs: '', bark: '', tips: [], along: [] };
+    const sprout = (x, y, ang, len, w, depth) => {
+      const ca = Math.cos(ang), sa = Math.sin(ang), b1 = (r() - .5) * len * .45, b2 = (r() - .5) * len * .45;
+      const c = [[x, y], [x + ca * len * .33 - sa * b1, y + sa * len * .33 + ca * b1], [x + ca * len * .66 - sa * b2, y + sa * len * .66 + ca * b2], [x + ca * len, y + sa * len]];
+      const pts = curve(c, 12);
+      out.limbs += limb(pts, w, w * .5);
+      pts.forEach((p, i) => { if (i % 4 === 2) out.along.push(p); });
+      out.tips.push(c[3]);
+      if (depth === 0) return;
+      const kids = 1 + (r() * 2.4 | 0);
+      for (let k = 0; k < kids; k++) { const t = .4 + r() * .6, p = bez(c, t); sprout(p[0], p[1], ang + (r() - .5) * 1.7, len * (.45 + r() * .3), w * .55, depth - 1); }
+    };
+    const main = curve([[318, 58], [250, 100], [210, 170], [160, 205]], 16).concat(curve([[160, 205], [118, 234], [82, 262], [34, 318]], 14).slice(1));
+    out.limbs += limb(main, 22, 6);
+    const N = normals(main); let lent = '';
+    main.forEach((p, i) => { if (i % 2) return; const w = (22 - 16 * i / main.length) * .32; lent += `M${f1(p[0] - N[i][0] * w)} ${f1(p[1] - N[i][1] * w)}L${f1(p[0] + N[i][0] * w)} ${f1(p[1] + N[i][1] * w)}`; });
+    [[.08, -2.3], [.15, 1.2], [.28, -1.9], [.36, 1.4], [.48, -2.0], [.56, 1.9], [.7, -1.8], [.78, 1.3], [.9, -2.4]].forEach(([t, a]) => {
+      const i = Math.round(t * (main.length - 1)), p = main[i], w = 22 - 16 * t;
+      sprout(p[0], p[1], a + (r() - .5) * .4, 45 + r() * 45, w * .5, 2);
+    });
+    out.bark = bark(r, main, 22, 6, '#5b4a42', '#7a675d');
+    const petal = 'M0 0C-4.2 -3 -5.6 -8 -2.4 -10.4L0 -8.8L2.4 -10.4C5.6 -8 4.2 -3 0 0Z';
+    const PINK = ['#f6cdd6', '#efb3c1', '#f9dde3', '#eaa2b4'];
+    const flower = (x, y, s) => {
+      const c = PINK[r() * PINK.length | 0], rot = r() * 72;
+      return `<g transform="translate(${f1(x)} ${f1(y)}) rotate(${f1(rot)}) scale(${f1(s)})">${[0, 72, 144, 216, 288].map(d => `<path d="${petal}" transform="rotate(${d})" fill="${c}"/>`).join('')}<circle r="2.6" fill="#c45a76"/>${[0, 60, 120, 180, 240, 300].map(d => `<circle cx="${f1(Math.cos(d / 57.3) * 3.6)}" cy="${f1(Math.sin(d / 57.3) * 3.6)}" r=".7" fill="#8e2f4a"/>`).join('')}</g>`;
+    };
+    let blossoms = '';
+    for (const [x, y] of out.tips) { const n = 3 + (r() * 4 | 0); for (let i = 0; i < n; i++) blossoms += r() < .18 ? `<ellipse cx="${f1(x + (r() - .5) * 16)}" cy="${f1(y + (r() - .5) * 14)}" rx="2.4" ry="3.4" fill="#d9788f"/>` : flower(x + (r() - .5) * 20, y + (r() - .5) * 16, .55 + r() * .5); }
+    for (const [x, y] of out.along) if (r() < .45) blossoms += flower(x + (r() - .5) * 10, y + (r() - .5) * 10, .45 + r() * .35);
+    let falling = '';
+    for (let i = 0; i < 30; i++) { const x = 10 + r() * 280, y = 300 + r() * 280, s = .4 + r() * .45; falling += `<path d="${petal}" transform="translate(${f1(x)} ${f1(y)}) rotate(${f1(r() * 360)}) scale(${f1(s)})" fill="${PINK[i % 4]}" opacity="${f1(.55 + r() * .4)}"/>`; }
+    const h1 = ridge(r, [[0, 500], [60, 476], [130, 492], [200, 466], [300, 488]], 12), h2 = ridge(r, [[0, 548], [80, 528], [160, 546], [240, 522], [300, 540]], 10);
+    return paperBase('url(#g-sky3)') +
+      `<circle cx="178" cy="232" r="112" fill="#fbf6ea" opacity=".55" filter="url(#f-mist)"/><circle cx="178" cy="232" r="88" fill="url(#g-moon)"/>` +
+      `<g fill="#e6dccb" opacity=".6"><ellipse cx="150" cy="210" rx="16" ry="11"/><ellipse cx="196" cy="252" rx="22" ry="13"/><ellipse cx="206" cy="200" rx="9" ry="7"/></g>` +
+      `<path d="${land(h1)}" fill="#d9cfc4" filter="url(#f-rough)"/><rect y="480" width="300" height="60" fill="url(#g-fade)"/><path d="${land(h2)}" fill="#c2b5aa" filter="url(#f-rough)"/>` +
+      `<g filter="url(#f-rough)"><path d="${out.limbs}" fill="#2a1f1b"/></g>` + out.bark +
+      `<path d="${lent}" stroke="#7d6a60" stroke-width="1" opacity=".55"/>` +
+      blossoms + falling + glyph('愛', 56, 528) + hanko(262, 570) + finish;
+  } },
+
+  bamboo: { name: 'Bamboo', draw() {
+    const r = R(5);
+    const stalk = (x, w, fill, node, lean, op = 1) => {
+      let g = `<g opacity="${op}" transform="rotate(${lean} ${x} 600)">`, y = 610;
+      const nodes = [];
+      while (y > -30) {
+        const h = 56 + r() * 34;
+        g += `<rect x="${f1(x - w / 2)}" y="${f1(y - h + 2)}" width="${w}" height="${f1(h - 2)}" fill="${fill}"/>` +
+          `<rect x="${f1(x - w / 2 - .8)}" y="${f1(y - h - 1)}" width="${f1(w + 1.6)}" height="3.2" rx="1.2" fill="${node}"/>` +
+          `<path d="M${f1(x - w * .3)} ${f1(y - h + 4)}h${f1(w * .45)}" stroke="#e9efe2" stroke-width=".8" opacity=".5"/>`;
+        y -= h; nodes.push(y);
+      }
+      return { svg: g + '</g>', nodes };
+    };
+    const leafD = 'M0 0C8 -4.5 30 -5.5 54 0C30 5.5 8 4.5 0 0Z';
+    const spray = (x, y, dir, col, rib, op, scale = 1) => {
+      const a = (dir > 0 ? -.55 : Math.PI + .55) + (r() - .5) * .5, l = (30 + r() * 30) * scale;
+      const ex = x + Math.cos(a) * l, ey = y + Math.sin(a) * l;
+      let g = `<g opacity="${op}"><path d="M${f1(x)} ${f1(y)}L${f1(ex)} ${f1(ey)}" stroke="#3a5a46" stroke-width="1.1"/>`;
+      const n = 3 + (r() * 4 | 0);
+      for (let i = 0; i < n; i++) {
+        const t = .45 + r() * .55, px = x + (ex - x) * t, py = y + (ey - y) * t;
+        const la = (dir > 0 ? 0.35 : Math.PI - 0.35) + (r() - .3) * 1.1 * (dir > 0 ? 1 : -1), s = (.65 + r() * .55) * scale;
+        g += `<g transform="translate(${f1(px)} ${f1(py)}) rotate(${f1(la * 57.3)}) scale(${f1(s)})"><path d="${leafD}" fill="${col}"/><path d="M3 0L50 0" stroke="${rib}" stroke-width=".6"/></g>`;
+      }
+      return g + '</g>';
+    };
+    let s = paperBase('url(#g-sky4)') + `<ellipse cx="150" cy="120" rx="160" ry="70" fill="#f5f6ee" opacity=".6" filter="url(#f-mist)"/>`;
+    for (const [x, w] of [[18, 5], [58, 6], [104, 5], [150, 7], [192, 5], [236, 6], [284, 5]]) {
+      const st = stalk(x, w, '#b8cbbd', '#9fb5a6', (r() - .5) * 2, .55); s += st.svg;
+      st.nodes.forEach((y, i) => { if (i % 2 && y > 40 && y < 520) s += spray(x, y, r() < .5 ? 1 : -1, '#a9bfae', '#c9d8cb', .5, .7); });
+    }
+    s += `<rect y="0" width="300" height="600" fill="#e8ebe0" opacity=".35"/>`;
+    for (const [x, w] of [[42, 9], [176, 10], [266, 11]]) {
+      const st = stalk(x, w, 'url(#g-bam2)', '#5c7d69', (r() - .5) * 3, .9); s += st.svg;
+      st.nodes.forEach((y, i) => { if (i % 2 === 0 && y > 30 && y < 500) s += spray(x, y, r() < .5 ? 1 : -1, '#5f8b70', '#8fb39b', .85, .85); });
+    }
+    s += `<rect y="300" width="300" height="90" fill="#eef0e6" opacity=".5" filter="url(#f-mist)"/>`;
+    for (const [x, w] of [[96, 16], [140, 12], [222, 19]]) {
+      const st = stalk(x, w, 'url(#g-bam)', '#1d3a2f', (r() - .5) * 2.4); s += st.svg;
+      st.nodes.forEach((y, i) => { if (i % 2 && y > 20 && y < 470) s += spray(x, y, r() < .5 ? 1 : -1, r() < .5 ? '#24493b' : '#3e6e57', '#7aa58a', 1); });
+    }
+    let fallen = '';
+    for (let i = 0; i < 6; i++) fallen += `<g transform="translate(${f1(20 + r() * 260)} ${f1(380 + r() * 170)}) rotate(${f1(r() * 360)}) scale(${f1(.4 + r() * .3)})"><path d="${leafD}" fill="#5f8b70" opacity=".8"/></g>`;
+    const ground = ridge(r, [[0, 566], [100, 556], [200, 566], [300, 558]], 6);
+    return s + fallen +
+      `<path d="${land(ground)}" fill="#cfd8c8"/>` + tufts(r, 150, 566, 150, 8, 60, 9, '#4b725c', .9, 1.4) + tufts(r, 150, 572, 150, 6, 40, 7, '#2f5546', .9, 1.2) +
+      `<g filter="url(#f-rough)"><path d="M180 590 C186 578 204 574 216 580 C224 584 226 592 220 596Z" fill="#6f7a72"/><path d="M200 578 C206 576 212 577 216 580" stroke="#dfe4da" stroke-width="1.2" fill="none"/></g>` +
+      glyph('夢', 44, 78) + hanko(26, 568) + finish;
+  } },
+};
+const art = {};
+const svgOf = id => `<svg viewBox="0 0 300 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${PAINTINGS[id].name} painting">${art[id] ??= PAINTINGS[id].draw()}</svg>`;
+
+function showScroll() {
+  const art = $('art');
+  if (typeof scroll === 'string') art.innerHTML = svgOf(PAINTINGS[scroll] ? scroll : 'pine');
+  else { art.innerHTML = '<img alt="our painting">'; loadImg(scroll).then(u => { art.firstChild.src = u; }, () => {}); }
+  document.querySelectorAll('.opt').forEach(o => o.classList.toggle('on', o.dataset.id === scroll));
+}
+function setScroll(v) {
+  const k = $('kake'), old = scroll;
+  $('picker').hidden = true;
+  if (old !== v && typeof old === 'object') dropImg(old);
+  scroll = v; saveSoon();
+  k.classList.add('rolling');
+  setTimeout(() => { showScroll(); k.classList.remove('rolling'); }, 650);
+}
+function buildPicker() {
+  $('opts').innerHTML = Object.keys(PAINTINGS).map(id => `<button class="opt" data-id="${id}">${svgOf(id)}${PAINTINGS[id].name}</button>`).join('');
+  $('opts').onclick = e => { const id = e.target.closest('.opt')?.dataset.id; if (id) setScroll(id); };
+  $('changeArt').onclick = () => { $('picker').hidden = !$('picker').hidden; };
+  $('ownArt').onclick = () => $('artFile').click();
+  $('artFile').onchange = async e => {
+    const f = e.target.files[0]; e.target.value = '';
+    if (!f) return;
+    const up = await uploadImage(f);
+    if (up) setScroll(up);
+  };
 }
 
-hangLights();
 buildWall();
+buildPicker();
 boot();
 </script>
 </body>
